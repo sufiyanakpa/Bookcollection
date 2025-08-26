@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Modal, Button, Form } from 'react-bootstrap';
-import { getBookApi, DeleteBooksApi, updateBookApi } from '../AllApiServices/allApis';
-import { Link } from 'react-router-dom';
+import { Card, Button } from 'react-bootstrap';
+import { getBookApi, DeleteBooksApi } from '../AllApiServices/allApis';
+import { Link, useNavigate } from 'react-router-dom';
 import Addbooks from '../components/Addbooks';
 import { toast } from 'react-toastify';
 
 function Addbook() {
   const [books, setBook] = useState([]);
   const [addResponse, setAddresponse] = useState('');
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [file, setFile] = useState(null);
-  const [editData, setEditData] = useState({
-    Title: '',
-    Author: '',
-    Book_id: '',
-    year: '',
-    Genre: ''
-  });
+  const navigate = useNavigate();
 
   useEffect(() => {
     getData();
@@ -30,54 +21,23 @@ function Addbook() {
     }
   };
 
-const handleDelete = async (id) => {
-  const confirmDelete = window.confirm("Are you sure you want to delete this book?");
-  
-  if (!confirmDelete) return;
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this book?");
 
-  const result = await DeleteBooksApi(id);
-  if (result.status === 204) {
-    toast.success("Book deleted successfully");
-    getData();
-  } else {
-    toast.error("Something went wrong");
-  }
-};
+    if (!confirmDelete) return;
 
-  const openEditModal = (book) => {
-    setSelectedBook(book);
-    setEditData({
-      Title: book.Title,
-      Author: book.Author,
-      Book_id: book.Book_id,
-      year: book.year,
-      Genre: book.Genre
-    });
-    setShowEditModal(true);
-  };
-
-  const handleEditSubmit = async () => {
-    const data = new FormData();
-    data.append("Title", editData.Title);
-    data.append("Author", editData.Author);
-    data.append("Book_id", editData.Book_id);
-    data.append("year", editData.year);
-    data.append("Genre", editData.Genre);
-
-    if (file) {
-      data.append("image", file);
-    }
-
-    const result = await updateBookApi(selectedBook.id, data);
-
-    if (result.status === 200) {
-      toast.success("Book updated successfully");
-      setShowEditModal(false);
-      setFile(null);
+    const result = await DeleteBooksApi(id);
+    if (result.status === 204) {
+      toast.success("Book deleted successfully");
       getData();
     } else {
-      toast.error("Failed to update book");
+      toast.error("Something went wrong");
     }
+  };
+
+  // New function to navigate to Edit page
+  const goToEditPage = (id) => {
+    navigate(`/edit/${id}`);
   };
 
   return (
@@ -101,15 +61,12 @@ const handleDelete = async (id) => {
                       <Card.Img variant="top" src={item.image} height={200} style={{ objectFit: "cover" }} />
                       <Card.Body>
                         <Card.Title>{item.Title}</Card.Title>
-                        <Card.Text>
-                          <strong>{item.Author}</strong> 
-                        </Card.Text>
-                        <Card.Text>
-                          <strong>{item.Genre}</strong> 
-                        </Card.Text>
+                        <Card.Text><strong>{item.Author}</strong></Card.Text>
+                        <Card.Text><strong>{item.Genre}</strong></Card.Text>
                         <div className='d-flex justify-content-center gap-2'>
+                          {/* Navigate to Edit.jsx */}
                           <Button
-                            onClick={() => openEditModal(item)}
+                            onClick={() => goToEditPage(item.id)}
                             style={{
                               color: "#3A2375",
                               background: "linear-gradient(135deg, #FFD700, #FFEC8B)",
@@ -120,6 +77,7 @@ const handleDelete = async (id) => {
                             }}>
                             Edit
                           </Button>
+
                           <Button
                             onClick={() => handleDelete(item.id)}
                             style={{
@@ -144,47 +102,6 @@ const handleDelete = async (id) => {
           }
         </div>
       </div>
-
-      
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} backdrop="static" keyboard={false}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Book</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Control className="mb-2" type="text" placeholder="Title"
-              value={editData.Title} onChange={(e) => setEditData({ ...editData, Title: e.target.value })} />
-            <Form.Control className="mb-2" type="text" placeholder="Author"
-              value={editData.Author} onChange={(e) => setEditData({ ...editData, Author: e.target.value })} />
-            <Form.Control className="mb-2" type="number" placeholder="Book ID"
-              value={editData.Book_id} onChange={(e) => setEditData({ ...editData, Book_id: e.target.value })} />
-            <Form.Control className="mb-2" type="number" placeholder="Year"
-              value={editData.year} onChange={(e) => setEditData({ ...editData, year: e.target.value })} />
-            <Form.Control className="mb-2" type="text" placeholder="Genre"
-              value={editData.Genre} onChange={(e) => setEditData({ ...editData, Genre: e.target.value })} />
-
-            <Form.Control className="mb-2" type="file"
-              onChange={(e) => setFile(e.target.files[0])} />
-
-            
-            {selectedBook?.image && (
-              <div className="mt-2 text-center">
-                <img
-                  src={selectedBook.image}
-                  alt="Current"
-                  height={100}
-                  style={{ objectFit: "cover" }}
-                />
-                <p className="text-muted mt-1">Current Image</p>
-              </div>
-            )}
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>Close</Button>
-          <Button variant="primary" onClick={handleEditSubmit}>Save Changes</Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 }

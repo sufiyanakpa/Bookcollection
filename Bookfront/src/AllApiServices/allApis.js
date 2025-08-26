@@ -26,7 +26,15 @@ export const getBookApi=async()=>{
     }
     return await axios.get(`${base_url}/book/`,options)
 }
-
+export const getBookByApi=async(id)=>{
+    const options={
+        headers:{
+            'Content-Type':"application/json",
+            'Authorization':`Token ${sessionStorage.getItem('token')}`
+        }  
+    }
+    return await axios.get(`${base_url}/book/${id}/`,options)
+}
 export const DeleteBooksApi=async(id)=>{
     const options={
         headers:{

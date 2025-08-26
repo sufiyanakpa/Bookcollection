@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Dashboard from './pages/Dashboard';
 import Addbook from './pages/Addbook';
+import Edit from './pages/Edit';
 
 import './App.css'
 
@@ -23,6 +24,7 @@ function App() {
        <Route path='/reg' element={<Reg/>}/>
        <Route path='/dash' element={<Dashboard/>}/>
        <Route path='/book' element={<Addbook/>}/>
+       <Route path='/edit/:id' element={<Edit/>}/>
 
        
 

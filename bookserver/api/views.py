@@ -22,5 +22,20 @@ class Addbooksviewset(ModelViewSet):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    
+    def update(self, request, *args, **kwargs):
+        """Handle full updates (PUT) and partial updates (PATCH)"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        data = request.data.copy()
+
+        # 🔥 Fix: Keep the existing image if no new one is uploaded
+        if 'image' not in data and instance.image:
+            data['image'] = instance.image
+
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 # Create your views here.
